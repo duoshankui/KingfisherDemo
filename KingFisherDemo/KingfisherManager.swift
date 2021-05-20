@@ -23,7 +23,7 @@ class KingfisherManager {
     var downloader: ImageDownloader
     
     convenience init() {
-        self.init(downloader: .default, cache: ImageCache())
+        self.init(downloader: .default, cache: .defalut)
     }
     
     init(downloader: ImageDownloader, cache: ImageCache) {
@@ -31,15 +31,31 @@ class KingfisherManager {
         self.cache = cache
     }
     
-    func retrieveImage(with resource: Resource, completionHandler: CompletionHandler?) -> RetrieveImageTask {
+    func retrieveImage(with resource: Resource,
+                       options: KingfisherOptionsInfo?,
+                       completionHandler: CompletionHandler?) -> RetrieveImageTask
+    {
         let task = RetrieveImageTask()
+        
+        let options = options ?? KingfisherEmptyOptionsInfo
         
         _ = downloadAndCacheImage(
             with: resource.downloadUrl,
             forKey: resource.cacheKey,
             retrieveImageTask: task,
-            completionHandler: completionHandler)
-        
+            completionHandler: completionHandler,
+            options: options)
+
+//        if options.forceRefresh {
+//            _ = downloadAndCacheImage(
+//                with: resource.downloadUrl,
+//                forKey: resource.cacheKey,
+//                retrieveImageTask: task,
+//                completionHandler: completionHandler,
+//                options: options)
+//        } else {
+//            /// 先检索缓存
+//        }
         return task
     }
     
@@ -47,7 +63,8 @@ class KingfisherManager {
     func downloadAndCacheImage(with url: URL,
                                forKey key: String,
                                retrieveImageTask: RetrieveImageTask,
-                               completionHandler: CompletionHandler?) -> RetrieveImageDownloadTask?
+                               completionHandler: CompletionHandler?,
+                               options: KingfisherOptionsInfo) -> RetrieveImageDownloadTask?
     {
         let downloader = self.downloader
         
@@ -55,7 +72,29 @@ class KingfisherManager {
             with: url,
             retrieveImageTask: retrieveImageTask,
             completionHandler: { image, error, imageUrl, originData in
-                completionHandler?(image, error, imageUrl)
+                
+                let targetCache = self.cache
+                if let error = error, error.code == 304 {
+                    return
+                }
+                
+                if let image = image, let originData = originData {
+                    targetCache.store(image,
+                                      original: originData,
+                                      forKey: key,
+                                      processorIdentifier: options.processor.identifier,
+                                      cacheSerializer: options.cacheSerializer,
+                                      completionHandler: {
+                                        guard options.waitForCache else { return }
+                                        
+                                        completionHandler?(image, nil, url)
+                                        
+                                      })
+                }
+                
+                if options.waitForCache == false || image == nil {
+                    completionHandler?(image, error, imageUrl)
+                }
         })
     }
     

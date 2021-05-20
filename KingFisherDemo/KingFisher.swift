@@ -30,4 +30,5 @@ public extension KingFisherCompatible {
 }
 
 extension UIImageView: KingFisherCompatible { }
-extension UIButton: KingFisherCompatible { } 
+extension UIButton: KingFisherCompatible { }
+extension UIImage: KingFisherCompatible { }

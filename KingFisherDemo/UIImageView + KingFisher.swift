@@ -13,7 +13,10 @@ import UIKit
 extension KingFisher where Base: UIImageView {
     
     @discardableResult
-    func setImage(with resource: Resource?, placeholder: Placeholder? = nil) -> RetrieveImageTask {
+    func setImage(with resource: Resource?,
+                  placeholder: Placeholder? = nil,
+                  options: KingfisherOptionsInfo? = nil) -> RetrieveImageTask
+    {
         guard let resource = resource else {
             self.placeholder = placeholder
             setWebURL(nil)
@@ -21,7 +24,7 @@ extension KingFisher where Base: UIImageView {
         }
         
         setWebURL(resource.downloadUrl)
-        let task = KingfisherManager.shared.retrieveImage(with: resource, completionHandler: {[weak base] image, error, imageUrl in
+        let task = KingfisherManager.shared.retrieveImage(with: resource, options: options, completionHandler: {[weak base] image, error, imageUrl in
             DispatchQueue.main.async {
                 
                 guard let strongBase = base, imageUrl == self.webURL else {

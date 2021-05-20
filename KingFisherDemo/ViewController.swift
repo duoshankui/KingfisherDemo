@@ -30,7 +30,7 @@ class ViewController: UIViewController {
         btn.kf.setBtnImage(with: URL(string: ""))
         
         
-        barrierMethod()
+//        barrierMethod()
         
     }
 }
