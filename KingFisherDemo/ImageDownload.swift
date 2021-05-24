@@ -21,6 +21,21 @@ struct RetrieveImageDownloadTask {
     public private(set) weak var ownerDownloader: ImageDownloader?
 }
 
+public enum KingfisherError: Int {
+    case invalidStatusCode = 10002
+    case notCached = 10003
+}
+
+public let KingfisherErrorStatusCodeKey = "statusCode"
+protocol ImageDownloaderDelegate: AnyObject {
+    func isValidStatusCode(_ code: Int, for downloader: ImageDownloader) -> Bool
+}
+
+extension ImageDownloaderDelegate {
+    func isValidStatusCode(_ code: Int, for downloader: ImageDownloader) -> Bool {
+        return (200..<400).contains(code)
+    }
+}
 
 class ImageDownloader {
     
@@ -30,10 +45,13 @@ class ImageDownloader {
         
         var downloadTaskCount = 0
         var downloadTask: RetrieveImageDownloadTask?
+        var cancelSemaphore: DispatchSemaphore?
     }
     
     
     open var downloadTimer: TimeInterval = 15.0
+    
+    weak var delegate: ImageDownloaderDelegate?
     
     fileprivate let sessionHandler: ImageDownloadSessionHandler
     fileprivate let session: URLSession?
@@ -130,6 +148,8 @@ extension ImageDownloader {
     }
 }
 
+extension ImageDownloader: ImageDownloaderDelegate {}
+
 final class ImageDownloadSessionHandler: NSObject, URLSessionDataDelegate {
     
     private let downloaderQueue: DispatchQueue
@@ -153,7 +173,24 @@ final class ImageDownloadSessionHandler: NSObject, URLSessionDataDelegate {
     }
     
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {        
-        let disposition = URLSession.ResponseDisposition.allow
+        
+        guard let downloader = self.downloadHolder else {
+            completionHandler(.cancel)
+            return
+        }
+        
+        var disposition = URLSession.ResponseDisposition.allow
+
+        if let statusCode = (response as? HTTPURLResponse)?.statusCode,
+           let url = dataTask.originalRequest?.url,
+           !(downloader.delegate ?? downloader).isValidStatusCode(statusCode, for: downloader) {
+            let error = NSError(domain: KingfisherErrorDomain,
+                                code: 10002,
+                                userInfo: [KingfisherErrorStatusCodeKey: statusCode])
+            
+            callCompletionHandlerFailure(error: error, url: url)
+            disposition = .cancel
+        }
         
         completionHandler(disposition)
     }
@@ -177,6 +214,7 @@ final class ImageDownloadSessionHandler: NSObject, URLSessionDataDelegate {
         guard let url = task.originalRequest?.url else { return }
         
         guard error == nil else {
+            callCompletionHandlerFailure(error: error!, url: url)
             return
         }
         
@@ -190,6 +228,23 @@ final class ImageDownloadSessionHandler: NSObject, URLSessionDataDelegate {
             downloader.fetchLoads.removeValue(forKey: url)
             if downloader.fetchLoads.isEmpty {
                 downloadHolder = nil
+            }
+        }
+    }
+    
+    private func callCompletionHandlerFailure(error: Error, url: URL) {
+        guard let downloder = self.downloadHolder, let fetchloader = downloder.fetchLoad(with: url) else {
+            return
+        }
+        clearFetchLoad(with: url)
+        var leftSignal: Int
+        repeat {
+            leftSignal = fetchloader.cancelSemaphore?.signal() ?? 0
+        } while leftSignal != 0
+        
+        for content in fetchloader.contents {
+            content.options.callbackDispatchQueue.async {
+                content.callback.completionHandler?(nil, error as NSError, url, nil)
             }
         }
     }

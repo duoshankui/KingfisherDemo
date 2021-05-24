@@ -15,6 +15,8 @@ public enum KingfisherOptionsInfoItem {
     case forceRefresh
     /// 是否等待缓存操作
     case waitForCache
+    case fromMemoryCacheOrRefresh
+    case onlyFromCache
 }
 
 /**
@@ -44,6 +46,8 @@ func <== (lhs: KingfisherOptionsInfoItem, rhs: KingfisherOptionsInfoItem) -> Boo
     switch (lhs, rhs) {
     case (.forceRefresh, .forceRefresh): return true
     case (.waitForCache, .waitForCache): return true
+    case (.fromMemoryCacheOrRefresh, .fromMemoryCacheOrRefresh): return true
+    case (.onlyFromCache, .onlyFromCache): return true
     default: return false
     }
 }
@@ -58,10 +62,21 @@ extension Collection where Iterator.Element == KingfisherOptionsInfoItem {
         return contains { $0 <== .waitForCache }
     }
     
+    public var fromMemoryCacheOrRefresh: Bool {
+        return contains { $0 <== .fromMemoryCacheOrRefresh }
+    }
+    
+    public var onlyFromCache: Bool {
+        return contains { $0 <== .onlyFromCache }
+    }
+    
     public var processor: ImageProcessor {
         return DefaultImageProcessor.default
     }
     
+    public var imageModifier: ImageModifier {
+        return DefaultImageModifier.default
+    }
     
     public var cacheSerializer: CacheSerializer {
         return DefaultCacheSerializer.default

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0443F78D265BA35800C550C3 /* ImageModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0443F78C265BA35800C550C3 /* ImageModifier.swift */; };
 		04C738EC26526D6B0037EB42 /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04C738EB26526D6B0037EB42 /* Resource.swift */; };
 		04C738F226526F0C0037EB42 /* Placeholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04C738F126526F0C0037EB42 /* Placeholder.swift */; };
 		04C738F8265283B40037EB42 /* Runtime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04C738F7265283B40037EB42 /* Runtime.swift */; };
@@ -29,6 +30,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0443F78C265BA35800C550C3 /* ImageModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageModifier.swift; sourceTree = "<group>"; };
 		04C738EB26526D6B0037EB42 /* Resource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
 		04C738F126526F0C0037EB42 /* Placeholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Placeholder.swift; sourceTree = "<group>"; };
 		04C738F7265283B40037EB42 /* Runtime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Runtime.swift; sourceTree = "<group>"; };
@@ -96,6 +98,7 @@
 				04C739072653A8F50037EB42 /* KingfisherOptionsInfo.swift */,
 				04C738F126526F0C0037EB42 /* Placeholder.swift */,
 				04C73900265363790037EB42 /* ImageCache.swift */,
+				0443F78C265BA35800C550C3 /* ImageModifier.swift */,
 				04C7398626560C770037EB42 /* CacheSerializer.swift */,
 				04C738FD26535D920037EB42 /* ImageDownload.swift */,
 				FC6579C2248651F80095BAA4 /* UIImageView + KingFisher.swift */,
@@ -180,6 +183,7 @@
 				04C739082653A8F50037EB42 /* KingfisherOptionsInfo.swift in Sources */,
 				04C73901265363790037EB42 /* ImageCache.swift in Sources */,
 				FC6579C3248651F80095BAA4 /* UIImageView + KingFisher.swift in Sources */,
+				0443F78D265BA35800C550C3 /* ImageModifier.swift in Sources */,
 				FC6579B124864F540095BAA4 /* ViewController.swift in Sources */,
 				04C7390B2653CD8C0037EB42 /* ImageProcessor.swift in Sources */,
 				FC6579C124864F630095BAA4 /* KingFisher.swift in Sources */,

@@ -11,6 +11,7 @@ import UIKit
 
 public protocol CacheSerializer {
     func data(with image: UIImage, original: Data?) -> Data?
+    func image(with data: Data, options: KingfisherOptionsInfo?) -> UIImage?
 }
 
 public struct DefaultCacheSerializer: CacheSerializer {
@@ -34,5 +35,10 @@ public struct DefaultCacheSerializer: CacheSerializer {
             data = original
         }
         return data
+    }
+    
+    public func image(with data: Data, options: KingfisherOptionsInfo?) -> UIImage? {
+        let options = options ?? KingfisherEmptyOptionsInfo
+        return UIImage(data: data, scale: 1.0)
     }
 }

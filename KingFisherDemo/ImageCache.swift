@@ -10,6 +10,11 @@ import Foundation
 import UIKit
 import CommonCrypto
 
+
+public enum CacheType {
+    case none, memory, disk
+}
+
 /// ImageCache represents both the memory and disk cache
 class ImageCache {
     
@@ -88,9 +93,89 @@ class ImageCache {
         }
     }
     
+    // MARK: - Get data from cache
+    
+    @discardableResult
+    open func retrieveImage(forKey key: String, options: KingfisherOptionsInfo?, completionHandler:((UIImage?, CacheType) -> Void)?) -> DispatchWorkItem? {
+        guard let completionHandler = completionHandler else {
+            return nil
+        }
+        
+        var block: DispatchWorkItem?
+        let options = options ?? KingfisherEmptyOptionsInfo
+        let imageModifier = options.imageModifier
+        
+        if let image = retrieveImageInMemoryCache(forKey: key, options: options) {
+            options.callbackDispatchQueue.async {
+                completionHandler(imageModifier.modify(image), .memory)
+            }
+        } else if options.fromMemoryCacheOrRefresh {
+            options.callbackDispatchQueue.async {
+                completionHandler(nil, .none)
+            }
+        } else {
+            
+            var sSelf: ImageCache! = self
+            
+            ///DispatchWorkItem 本质是一个等待执行的代码块
+            
+            block = DispatchWorkItem(block: {
+                if let image = sSelf.retrieveImageInDiskCache(forKey: key, options: options) {
+                    sSelf.store(image,
+                                forKey: key,
+                                processorIdentifier: options.processor.identifier,
+                                cacheSerializer: options.cacheSerializer,
+                                toDisk: false, completionHandler: nil)
+                    options.callbackDispatchQueue.async {
+                        completionHandler(imageModifier.modify(image), .disk)
+                        sSelf = nil
+                    }
+                } else {
+                    options.callbackDispatchQueue.async {
+                        completionHandler(nil, .none)
+                        sSelf = nil
+                    }
+                }
+            })
+            sSelf.ioQueue.async(execute: block!)
+        }
+        
+        return block
+    }
+    
+    /// Get an image for key from memory
+    func retrieveImageInMemoryCache(forKey key: String, options: KingfisherOptionsInfo? = nil) -> UIImage? {
+        let options = options ?? KingfisherEmptyOptionsInfo
+        let computedKey = key.computedKey(with: options.processor.identifier)
+        let image = memoryCache.object(forKey: computedKey as NSString)
+        return image as? UIImage
+    }
+    
+    func retrieveImageInDiskCache(forKey key: String, options: KingfisherOptionsInfo? = nil) -> UIImage? {
+        let options = options ?? KingfisherEmptyOptionsInfo
+        let computedKey = key.computedKey(with: options.processor.identifier)
+        
+        let image = diskImage(forComputedKey: computedKey, serializer: options.cacheSerializer, options: options)
+        return image
+    }
 }
 
 extension ImageCache {
+    
+    func diskImage(forComputedKey key: String, serializer: CacheSerializer, options: KingfisherOptionsInfo) -> UIImage? {
+        if let data = diskImageData(forComputedKey: key) {
+            return serializer.image(with: data, options: options)
+        } else {
+            return nil
+        }
+    }
+    
+    func diskImageData(forComputedKey key: String) -> Data? {
+        let filePath = cachePath(forComputedKey: key)
+        let data = try? Data(contentsOf: URL(fileURLWithPath: filePath))
+        return data
+    }
+    
     func cachePath(forComputedKey key: String) -> String {
         let fileName = cacheFileName(forComputedKey: key)
         return (diskCachePath as NSString).appendingPathComponent(fileName)

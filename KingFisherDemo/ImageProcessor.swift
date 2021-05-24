@@ -21,6 +21,14 @@ public protocol ImageProcessor {
     func process(item: ProcessImageItem, options: KingfisherOptionsInfo) -> UIImage?
 }
 
+func ==(left: ImageProcessor, right: ImageProcessor) -> Bool {
+    return left.identifier == right.identifier
+}
+
+func !=(left: ImageProcessor, right: ImageProcessor) -> Bool {
+    return !(left == right)
+}
+
 public struct DefaultImageProcessor: ImageProcessor {
     
     public static let `default` = DefaultImageProcessor()

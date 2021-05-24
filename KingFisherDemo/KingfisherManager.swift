@@ -16,6 +16,8 @@ final class RetrieveImageTask {
     static let empty = RetrieveImageTask()
 }
 
+public let KingfisherErrorDomain = "com.doublek.Kingfisher.Error"
+
 class KingfisherManager {
     static let shared = KingfisherManager()
     
@@ -39,23 +41,29 @@ class KingfisherManager {
         
         let options = options ?? KingfisherEmptyOptionsInfo
         
-        _ = downloadAndCacheImage(
-            with: resource.downloadUrl,
-            forKey: resource.cacheKey,
-            retrieveImageTask: task,
-            completionHandler: completionHandler,
-            options: options)
+//        _ = downloadAndCacheImage(
+//            with: resource.downloadUrl,
+//            forKey: resource.cacheKey,
+//            retrieveImageTask: task,
+//            completionHandler: completionHandler,
+//            options: options)
 
-//        if options.forceRefresh {
-//            _ = downloadAndCacheImage(
-//                with: resource.downloadUrl,
-//                forKey: resource.cacheKey,
-//                retrieveImageTask: task,
-//                completionHandler: completionHandler,
-//                options: options)
-//        } else {
-//            /// 先检索缓存
-//        }
+        if options.forceRefresh {
+            _ = downloadAndCacheImage(
+                with: resource.downloadUrl,
+                forKey: resource.cacheKey,
+                retrieveImageTask: task,
+                completionHandler: completionHandler,
+                options: options)
+        } else {
+            /// 先检索缓存
+            tryToRetrieveImageFromCache(forKey: resource.cacheKey,
+                                        with: resource.downloadUrl,
+                                        retrieveTask: task,
+                                        progressBlock: nil,
+                                        completionHandler: completionHandler,
+                                        options: options)
+        }
         return task
     }
     
@@ -98,4 +106,49 @@ class KingfisherManager {
         })
     }
     
+    func tryToRetrieveImageFromCache(forKey key: String,
+                                     with url: URL,
+                                     retrieveTask: RetrieveImageTask,
+                                     progressBlock: DownloadProgressBlock? = nil,
+                                     completionHandler: CompletionHandler? = nil,
+                                     options: KingfisherOptionsInfo)
+    {
+        let diskTaskCompletionHandler: CompletionHandler = {image, error, imageUrl in
+            completionHandler?(image, error, imageUrl)
+        }
+        
+        func handlerNoCache() {
+            if options.onlyFromCache {
+                let error = NSError(domain: KingfisherErrorDomain,
+                                    code: KingfisherError.notCached.rawValue,
+                                    userInfo: nil)
+                diskTaskCompletionHandler(nil, error, url)
+                return
+            }
+            
+            self.downloadAndCacheImage(with: url,
+                                       forKey: key,
+                                       retrieveImageTask: retrieveTask,
+                                       completionHandler: completionHandler,
+                                       options: options)
+        }
+        
+        let targetCache = self.cache
+        
+        targetCache.retrieveImage(forKey: key, options: options) { (image, cacheType) in
+            
+            /// 从缓存里获取到图片，结束
+            if image != nil {
+                diskTaskCompletionHandler(image, nil, url)
+                return
+            }
+            
+            /// 缓存里没有图片，去下载
+            let processor = options.processor
+            guard processor != DefaultImageProcessor.default else {
+                handlerNoCache()
+                return
+            }
+        }
+    }
 }
