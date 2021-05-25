@@ -22,13 +22,13 @@ public struct DefaultCacheSerializer: CacheSerializer {
     
     public func data(with image: UIImage, original: Data?) -> Data? {
         
-        let imageFormat = ImageFormat.unknown
+        let imageFormat = original?.kf.imageFormat ?? .unknown
         let data: Data?
         switch imageFormat {
         case .PNG:
-            return original
+            data = image.pngData()
         case .JPEG:
-            return original
+            data = image.jpegData(compressionQuality: 1.0)
         case .GIF:
             return original
         case .unknown:
@@ -39,6 +39,6 @@ public struct DefaultCacheSerializer: CacheSerializer {
     
     public func image(with data: Data, options: KingfisherOptionsInfo?) -> UIImage? {
         let options = options ?? KingfisherEmptyOptionsInfo
-        return UIImage(data: data, scale: 1.0)
+        return KingFisher<UIImage>.image(data: data, scale: options.scaleFactor)
     }
 }

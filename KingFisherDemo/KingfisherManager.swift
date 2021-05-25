@@ -41,13 +41,6 @@ class KingfisherManager {
         
         let options = options ?? KingfisherEmptyOptionsInfo
         
-//        _ = downloadAndCacheImage(
-//            with: resource.downloadUrl,
-//            forKey: resource.cacheKey,
-//            retrieveImageTask: task,
-//            completionHandler: completionHandler,
-//            options: options)
-
         if options.forceRefresh {
             _ = downloadAndCacheImage(
                 with: resource.downloadUrl,

@@ -18,9 +18,9 @@ public final class KingFisher<Base> {
 
 
 public protocol KingFisherCompatible {
-//    associatedtype CompatibleType
-//    /// 只读
-//    var kf: CompatibleType { get }
+    associatedtype CompatibleType
+    /// 只读
+    var kf: CompatibleType { get }
 }
 
 public extension KingFisherCompatible {

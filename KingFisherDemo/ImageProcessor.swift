@@ -35,12 +35,14 @@ public struct DefaultImageProcessor: ImageProcessor {
     
     public let identifier: String = ""
     
+    public init() {}
+    
     public func process(item: ProcessImageItem, options: KingfisherOptionsInfo) -> UIImage? {
         switch item {
         case .image(let image):
             return image
         case .data(let data):
-            return UIImage(data: data)
+            return KingFisher<UIImage>.image(data: data, scale: options.scaleFactor)
         }
     }
 }

@@ -86,4 +86,8 @@ extension Collection where Iterator.Element == KingfisherOptionsInfoItem {
         return DispatchQueue.main
     }
     
+    public var scaleFactor: CGFloat {
+        return 1.0
+    }
+    
 }

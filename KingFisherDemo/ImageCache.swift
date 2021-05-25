@@ -126,12 +126,12 @@ class ImageCache {
                                 processorIdentifier: options.processor.identifier,
                                 cacheSerializer: options.cacheSerializer,
                                 toDisk: false, completionHandler: nil)
-                    options.callbackDispatchQueue.async {
+                    options.callbackDispatchQueue.safeAsync {
                         completionHandler(imageModifier.modify(image), .disk)
                         sSelf = nil
                     }
                 } else {
-                    options.callbackDispatchQueue.async {
+                    options.callbackDispatchQueue.safeAsync {
                         completionHandler(nil, .none)
                         sSelf = nil
                     }

@@ -22,6 +22,10 @@ struct RetrieveImageDownloadTask {
 }
 
 public enum KingfisherError: Int {
+    /// badData: The downloaded data is not an image or the data is corrupted.
+    case badData = 10000
+    /// notModified: The remote server responded a 304 code. No image data downloaded.
+    case notModified = 10001
     case invalidStatusCode = 10002
     case notCached = 10003
 }
@@ -185,7 +189,7 @@ final class ImageDownloadSessionHandler: NSObject, URLSessionDataDelegate {
            let url = dataTask.originalRequest?.url,
            !(downloader.delegate ?? downloader).isValidStatusCode(statusCode, for: downloader) {
             let error = NSError(domain: KingfisherErrorDomain,
-                                code: 10002,
+                                code: KingfisherError.invalidStatusCode.rawValue,
                                 userInfo: [KingfisherErrorStatusCodeKey: statusCode])
             
             callCompletionHandlerFailure(error: error, url: url)
@@ -274,8 +278,21 @@ final class ImageDownloadSessionHandler: NSObject, URLSessionDataDelegate {
                 }
                 
                 if let image = image {
-                    callbackQueue.async {
-                        completionHandler?(image, nil, url, data)
+                    let imageModifier = options.imageModifier
+                    let finalImage = imageModifier.modify(image)
+                    callbackQueue.safeAsync {
+                        completionHandler?(finalImage, nil, url, data)
+                    }
+                } else {
+                    if let res = task.response as? HTTPURLResponse, res.statusCode == 304 {
+                        let notModified = NSError(domain: KingfisherErrorDomain, code: KingfisherError.notModified.rawValue, userInfo: nil)
+                        completionHandler?(nil, notModified, url, nil)
+                        return
+                    }
+                    
+                    let badData = NSError(domain: KingfisherErrorDomain, code: KingfisherError.badData.rawValue, userInfo: nil)
+                    callbackQueue.safeAsync {
+                        completionHandler?(nil, badData, url, nil)
                     }
                 }
             }

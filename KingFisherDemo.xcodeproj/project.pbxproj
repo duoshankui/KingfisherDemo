@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0443F78D265BA35800C550C3 /* ImageModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0443F78C265BA35800C550C3 /* ImageModifier.swift */; };
+		044D5572265D062C0054E718 /* ThreadHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044D5571265D062C0054E718 /* ThreadHelper.swift */; };
 		04C738EC26526D6B0037EB42 /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04C738EB26526D6B0037EB42 /* Resource.swift */; };
 		04C738F226526F0C0037EB42 /* Placeholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04C738F126526F0C0037EB42 /* Placeholder.swift */; };
 		04C738F8265283B40037EB42 /* Runtime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04C738F7265283B40037EB42 /* Runtime.swift */; };
@@ -31,6 +32,7 @@
 
 /* Begin PBXFileReference section */
 		0443F78C265BA35800C550C3 /* ImageModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageModifier.swift; sourceTree = "<group>"; };
+		044D5571265D062C0054E718 /* ThreadHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadHelper.swift; sourceTree = "<group>"; };
 		04C738EB26526D6B0037EB42 /* Resource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
 		04C738F126526F0C0037EB42 /* Placeholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Placeholder.swift; sourceTree = "<group>"; };
 		04C738F7265283B40037EB42 /* Runtime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Runtime.swift; sourceTree = "<group>"; };
@@ -105,6 +107,7 @@
 				04C738FA2653570A0037EB42 /* KingfisherManager.swift */,
 				04C738EB26526D6B0037EB42 /* Resource.swift */,
 				04C738F7265283B40037EB42 /* Runtime.swift */,
+				044D5571265D062C0054E718 /* ThreadHelper.swift */,
 			);
 			path = KingFisherDemo;
 			sourceTree = "<group>";
@@ -191,6 +194,7 @@
 				04C738F8265283B40037EB42 /* Runtime.swift in Sources */,
 				04C738FE26535D920037EB42 /* ImageDownload.swift in Sources */,
 				04C73994265653B80037EB42 /* Image.swift in Sources */,
+				044D5572265D062C0054E718 /* ThreadHelper.swift in Sources */,
 				04C7398726560C770037EB42 /* CacheSerializer.swift in Sources */,
 				FC6579AD24864F540095BAA4 /* AppDelegate.swift in Sources */,
 				FC6579AF24864F540095BAA4 /* SceneDelegate.swift in Sources */,
